@@ -1,5 +1,5 @@
 import { Container, Graphics, Text } from 'pixi.js'
-import type { SlotSymbolsType } from '../../../../types'
+import type { SlotSymbolsType } from "@types"
 
 export class SymbolView extends Container {
     public symbol!: SlotSymbolsType

@@ -8,15 +8,15 @@ const defaultButtonOptions = {
     text: '',
     width: 301,
     height: 112,
-    fontSize: 28
+    fontSize: 28,
+    active: false
 }
 
 type ButtonOptions = typeof defaultButtonOptions
 
-/**
- * The big rectangle button, with a label, idle and pressed states
- */
 export class Button extends FancyButton {
+    private _active: boolean
+
     constructor(options: Partial<ButtonOptions> = {}) {
         const opts = { ...defaultButtonOptions, ...options }
 
@@ -55,9 +55,18 @@ export class Button extends FancyButton {
 
         this.width = opts.width
         this.height = opts.height
-
+        this._active = opts.active
         this.onDown.connect(this.handleDown.bind(this))
         this.onHover.connect(this.handleHover.bind(this))
+    }
+
+    public get active(): boolean {
+        return this._active
+    }
+
+    public set active(value: boolean) {
+        if (this._active === value) return
+        this._active = value
     }
 
     private handleHover() {

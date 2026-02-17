@@ -1,7 +1,7 @@
 import type { Ticker } from 'pixi.js'
 import { Assets, BigPool, Container } from 'pixi.js'
 
-import type { CreationEngine } from '../engine'
+import type { CreationEngine } from '..'
 
 /** Interface for app screens */
 interface AppScreen extends Container {
@@ -31,7 +31,7 @@ interface AppScreen extends Container {
 
 /** Interface for app screens constructors */
 interface AppScreenConstructor {
-    new (): AppScreen
+    new(): AppScreen
     /** List of assets bundles required by the screen */
     assetBundles?: string[]
 }

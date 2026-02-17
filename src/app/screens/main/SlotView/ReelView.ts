@@ -1,99 +1,142 @@
 import { Container } from 'pixi.js'
 import { SymbolView } from './SymbolView'
-import { symbols } from '../../../../config'
-import type { SlotSymbolsType } from '../../../../types'
+import { symbols } from '@config'
+import { type SlotSymbolsType, ReelState } from "@types"
 
 export class ReelView extends Container {
+
     private readonly symbolSize = 100
     private readonly visibleCount = 3
     private readonly buffer = 2
 
     private symbolsViews: SymbolView[] = []
 
+    private state: ReelState = ReelState.IDLE
+
     private speed = 0
-    private spinning = false
-    private stopping = false
+    private baseSpeed = 25
+    private turboSpeed = 45
 
     private stopResult: SlotSymbolsType[] = []
 
+    private snapTargetOffset = 0
+
+    onStop?: () => void
+
+
     constructor() {
         super()
-
         const total = this.visibleCount + this.buffer
 
         for (let i = 0; i < total; i++) {
             const sym = new SymbolView(this.symbolSize)
+
             sym.y = i * this.symbolSize
             sym.setSymbol(this.randomSymbol())
+
             this.symbolsViews.push(sym)
             this.addChild(sym)
         }
     }
 
-    // -----------------------
-    // PUBLIC API
-    // -----------------------
-
-    startSpin() {
-        this.spinning = true
-        this.stopping = false
-        this.speed = 25
+    startSpin(turbo = false) {
+        this.state = ReelState.SPINNING
+        this.speed = turbo
+            ? this.turboSpeed
+            : this.baseSpeed
     }
+
 
     stopSpin(result: SlotSymbolsType[]) {
         this.stopResult = result
-        this.stopping = true
+        this.state = ReelState.STOPPING
+        this.prepareStopSymbols()
     }
+
 
     update() {
-        if (!this.spinning) return
-
-        for (const sym of this.symbolsViews) {
-            sym.y += this.speed
-        }
-
+        if (this.state === ReelState.IDLE) return
+        this.moveSymbols()
         this.recycleSymbols()
 
-        if (this.stopping) {
-            this.speed *= 0.9
-
-            if (this.speed < 2) {
-                this.snapToResult()
-            }
+        switch (this.state) {
+            case ReelState.STOPPING:
+                this.updateStopping()
+                break
+            case ReelState.SNAP:
+                this.updateSnap()
+                break
         }
     }
 
-    // -----------------------
-    // INTERNAL LOGIC
-    // -----------------------
+    private moveSymbols() {
+        for (const sym of this.symbolsViews)
+            sym.y += this.speed
+    }
+
 
     private recycleSymbols() {
-        const totalHeight = this.symbolsViews.length * this.symbolSize
+        const totalHeight =
+            this.symbolsViews.length * this.symbolSize
 
         for (const sym of this.symbolsViews) {
             if (sym.y >= totalHeight) {
                 sym.y -= totalHeight
-                sym.setSymbol(this.randomSymbol())
+                if (this.state === ReelState.SPINNING)
+                    sym.setSymbol(this.randomSymbol())
             }
         }
     }
 
-    private snapToResult() {
-        this.spinning = false
-        this.stopping = false
-        this.speed = 0
+    private prepareStopSymbols() {
+        const total = this.symbolsViews.length
 
+        for (let i = 0; i < this.visibleCount; i++) {
+            const sym =
+                this.symbolsViews[
+                (total - this.visibleCount + i) % total
+                ]
+
+            sym.setSymbol(this.stopResult[i])
+        }
+
+        this.snapTargetOffset =
+            total * this.symbolSize
+    }
+
+
+    private updateStopping() {
+        this.speed *= 0.92
+        if (this.speed < 6) {
+            this.state = ReelState.SNAP
+        }
+    }
+
+
+    private updateSnap() {
+        this.speed *= 0.85
+        if (this.speed < 0.8) {
+            this.speed = 0
+            this.finalSnap()
+            this.state = ReelState.IDLE
+            this.onStop?.()
+        }
+    }
+
+
+    private finalSnap() {
         for (let i = 0; i < this.symbolsViews.length; i++) {
             const sym = this.symbolsViews[i]
-            sym.y = i * this.symbolSize
-
-            if (i < this.visibleCount) {
+            sym.y =
+                i * this.symbolSize
+            if (i < this.visibleCount)
                 sym.setSymbol(this.stopResult[i])
-            }
         }
     }
 
     private randomSymbol(): SlotSymbolsType {
-        return symbols[Math.floor(Math.random() * symbols.length)]
+        return symbols[
+            Math.floor(Math.random() * symbols.length)
+        ]
     }
 }

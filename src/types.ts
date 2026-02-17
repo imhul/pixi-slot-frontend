@@ -8,3 +8,10 @@ export enum SlotState {
     STOPPING = 'STOPPING',
     STOPPED = 'STOPPED'
 }
+
+export enum ReelState {
+    IDLE,
+    SPINNING,
+    STOPPING,
+    SNAP
+}

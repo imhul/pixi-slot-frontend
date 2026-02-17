@@ -14,7 +14,7 @@ import manifest from '../manifest.json'
 import { CreationAudioPlugin } from './audio/AudioPlugin'
 import { CreationNavigationPlugin } from './navigation/NavigationPlugin'
 import { CreationResizePlugin } from './resize/ResizePlugin'
-import { getResolution } from './utils/getResolution'
+import { getResolution } from '@engine-utils/getResolution'
 
 extensions.remove(ResizePlugin)
 extensions.add(CreationResizePlugin)

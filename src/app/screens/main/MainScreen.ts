@@ -1,5 +1,5 @@
 import { Container, Ticker } from 'pixi.js'
-import { FancyButton } from '@pixi/ui'
+import { FancyButton, Switcher } from '@pixi/ui'
 import { engine } from '../../getEngine'
 import { PausePopup } from '../../popups/PausePopup'
 import { SettingsPopup } from '../../popups/SettingsPopup'
@@ -13,9 +13,10 @@ export class MainScreen extends Container {
 
     private mainContainer: Container
     private slot!: SlotController
-
+    private turboEnabled = false
     private pauseButton: FancyButton
     private spinButton: Button
+    private turboSwitch: Switcher
     private settingsButton: FancyButton
     private paused = false
 
@@ -39,6 +40,15 @@ export class MainScreen extends Container {
         })
 
         this.addChild(this.spinButton)
+
+        this.turboSwitch = new Switcher([`switch_off.png`, `switch_on.png`])
+
+        this.turboSwitch.onChange.connect(() => {
+            this.turboEnabled = !this.turboEnabled
+            this.slot.setTurbo(this.turboEnabled)
+        })
+
+        this.addChild(this.turboSwitch)
 
         this.pauseButton = new FancyButton({
             defaultView: 'icon-pause.png',
@@ -80,7 +90,9 @@ export class MainScreen extends Container {
         this.mainContainer.x = width * 0.5
         this.mainContainer.y = height * 0.5
 
-        this.spinButton.x = width / 2
+        this.turboSwitch.x = width / 2
+        this.turboSwitch.y = height
+        this.spinButton.x = width / 2 + 140
         this.spinButton.y = height - 140
         this.pauseButton.x = 30
         this.pauseButton.y = 30

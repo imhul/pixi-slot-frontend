@@ -1,9 +1,10 @@
 import { Container } from 'pixi.js'
 import { ReelView } from './ReelView'
-import type { SlotSymbolsType } from '../../../../types'
+import { ReelController } from './ReelController'
+import type { SlotSymbolsType } from "@types"
 
 export class SlotView extends Container {
-    private reels: ReelView[] = []
+    private reels: ReelController[] = []
     private paused = false
 
     init() {
@@ -24,13 +25,25 @@ export class SlotView extends Container {
         for (const reel of this.reels) reel.update()
     }
 
-    startSpin() {
-        for (const reel of this.reels) reel.startSpin()
+    startSpin(turbo: boolean) {
+        for (const reel of this.reels) reel.startSpin(turbo)
     }
+
+    stopReel(index: number, result: SlotSymbolsType[]) {
+        this.reels[index].stopSpin(result);
+    }
+
+    // stopSpin(result: SlotSymbolsType[][]) {
+    //     this.reels.forEach((reel, i) => {
+    //         reel.stopSpin(result[i])
+    //     })
+    // }
 
     stopSpin(result: SlotSymbolsType[][]) {
         this.reels.forEach((reel, i) => {
-            reel.stopSpin(result[i])
+            setTimeout(() => {
+                reel.stopSpin(result[i])
+            }, i * 200)
         })
     }
 

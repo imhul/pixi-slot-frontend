@@ -5,7 +5,7 @@ import {
     ReelSymbolsType,
     SlotState,
     SpinResult
-} from '../../../types'
+} from "@types"
 
 export class SlotModel {
     public reels: ReelSymbolsType[] = []
